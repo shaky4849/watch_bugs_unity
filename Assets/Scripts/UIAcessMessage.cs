@@ -6,6 +6,9 @@ public class UIAcessMessage : MonoBehaviour
 {
 	Text textMessage;
 	RectTransform textRectTransform;
+	RectTransform imageRectTransform;
+
+	public Image backgroundImage;
 
 	public static UIAcessMessage _instance;
 	public static UIAcessMessage Instance { get { return _instance; } }
@@ -17,21 +20,36 @@ public class UIAcessMessage : MonoBehaviour
 		else
 			_instance = this;
 
-		textMessage = gameObject.GetComponent<Text> ();
+		//textMessage = gameObject.GetComponent<Text> ();
+		imageRectTransform = backgroundImage.GetComponent<RectTransform>();
 		textRectTransform = gameObject.GetComponent<RectTransform> ();
 	}
 
-	public void ShowMessage(Vector3 messagePosition, string message)
+	public void ShowMessage(Vector3 messagePosition)
 	{
+		if (!gameObject.activeSelf)
+			gameObject.SetActive (true);
 		Vector2 uiNewPosition = GetCanvasPosition (messagePosition);
-		uiNewPosition.x += 65f;
+		//uiNewPosition.x += 65f;
 		textRectTransform.anchoredPosition = uiNewPosition;
-		textMessage.text = message;
+		//textMessage.text = message;
+	}
+
+	public void SetBackgroundScale(float value)
+	{
+		imageRectTransform.sizeDelta = new Vector2 (imageRectTransform.sizeDelta.x + value, imageRectTransform.sizeDelta.y);
+	}
+
+	public void ResetBackgroundScale()
+	{
+		imageRectTransform.sizeDelta = new Vector2 (0, imageRectTransform.sizeDelta.y);
 	}
 
 	public void CleanMessage()
 	{
-		textMessage.text = "";
+		if (gameObject.activeSelf)
+			gameObject.SetActive (false);
+		//textMessage.text = "";
 	}
 
 	Vector2 GetCanvasPosition(Vector3 worldObjectPoint)
