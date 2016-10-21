@@ -38,6 +38,11 @@ public class GameCamera : MonoBehaviour
 			//transform.Rotate (Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity, 0, 0);
 			//transform.Rotate (0, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity * -1f, 0, Space.World);
 
+			if (Input.GetKeyDown (KeyCode.Escape) && transform.parent.gameObject.tag != "Player") 
+			{
+				DoAction(GameObject.Find("Player"));
+			}
+
 			if (Physics.Raycast (transform.position, transform.forward, out hitInfo, raycastDistance, raycastLayer)) 
 			{
 				UIAcessMessage.Instance.ShowMessage (hitInfo.transform.position);
@@ -82,20 +87,27 @@ public class GameCamera : MonoBehaviour
 	void OnCompleteAnim()
 	{		
 		GetObjectRotation ();
+		PlayerScript.Instance.UpdatePlayer ();
 		isEnabled = true;
 		//hitInfo.transform.GetComponent<SphereCollider> ().radius = 0;
 	}
 
 	void DoAction(GameObject gameObject)
 	{
-		string tag = gameObject.GetComponent<HackableObject> ().myTag;
+		Transform cameraNewPosition;
 
-		switch (tag) 
+		switch (gameObject.tag) 
 		{
 			case "SecCamera":
-				Transform cameraNewPosition = hitInfo.transform.FindChild("CameraPosition");
+				cameraNewPosition = gameObject.transform.FindChild("CameraPosition");
 				Camera.main.transform.parent = cameraNewPosition;
 				LeanTween.move (Camera.main.gameObject, cameraNewPosition.position, .8f).setOnComplete(OnCompleteAnim);
+				LeanTween.rotate (Camera.main.gameObject, cameraNewPosition.rotation.eulerAngles, .8f);
+				break;
+			case "Player":
+				cameraNewPosition = gameObject.transform.FindChild ("CameraPosition");
+				Camera.main.transform.parent = cameraNewPosition;
+				LeanTween.move (Camera.main.gameObject, new Vector3 (cameraNewPosition.position.x, cameraNewPosition.position.y, -2f), .8f).setOnComplete(OnCompleteAnim);
 				LeanTween.rotate (Camera.main.gameObject, cameraNewPosition.rotation.eulerAngles, .8f);
 				break;
 		}
