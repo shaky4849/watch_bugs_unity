@@ -32,11 +32,16 @@ public class GameCamera : MonoBehaviour
 	{
 		if (isEnabled) 
 		{
-			transform.RotateAround (rotationObject.position, rotationObject.up, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity);
-			transform.RotateAround (rotationObject.position, rotationObject.right, Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity * -1f);
-			transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
-			//transform.Rotate (Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity, 0, 0);
-			//transform.Rotate (0, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity * -1f, 0, Space.World);
+			if (Input.GetAxis ("Horizontal") == 0 && Input.GetAxis ("Vertical") == 0) {
+				transform.RotateAround (rotationObject.position, rotationObject.up, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity);
+				transform.RotateAround (rotationObject.position, rotationObject.right, Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity * -1f);
+				transform.rotation = Quaternion.Euler (transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
+				//transform.Rotate (Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity, 0, 0);
+				//transform.Rotate (0, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity * -1f, 0, Space.World);
+			} else {
+				transform.localPosition = new Vector3 (0, 0, -2f);
+				transform.localEulerAngles = Vector3.zero;
+			}
 
 			if (Input.GetKeyDown (KeyCode.Escape) && transform.parent.gameObject.tag != "Player") 
 			{
@@ -87,7 +92,7 @@ public class GameCamera : MonoBehaviour
 	void OnCompleteAnim()
 	{		
 		GetObjectRotation ();
-		PlayerScript.Instance.UpdatePlayer ();
+		//PlayerScript.Instance.UpdatePlayer ();
 		isEnabled = true;
 		//hitInfo.transform.GetComponent<SphereCollider> ().radius = 0;
 	}
@@ -101,14 +106,14 @@ public class GameCamera : MonoBehaviour
 			case "SecCamera":
 				cameraNewPosition = gameObject.transform.FindChild("CameraPosition");
 				Camera.main.transform.parent = cameraNewPosition;
-				LeanTween.move (Camera.main.gameObject, cameraNewPosition.position, .8f).setOnComplete(OnCompleteAnim);
-				LeanTween.rotate (Camera.main.gameObject, cameraNewPosition.rotation.eulerAngles, .8f);
+				LeanTween.moveLocal (Camera.main.gameObject, Vector3.zero, .8f).setOnComplete(OnCompleteAnim);
+				LeanTween.rotateLocal (Camera.main.gameObject, Vector3.zero, .8f);
 				break;
 			case "Player":
 				cameraNewPosition = gameObject.transform.FindChild ("CameraPosition");
 				Camera.main.transform.parent = cameraNewPosition;
-				LeanTween.move (Camera.main.gameObject, new Vector3 (cameraNewPosition.position.x, cameraNewPosition.position.y, -2f), .8f).setOnComplete(OnCompleteAnim);
-				LeanTween.rotate (Camera.main.gameObject, cameraNewPosition.rotation.eulerAngles, .8f);
+				LeanTween.moveLocal (Camera.main.gameObject, new Vector3 (0, 0, -2f), .8f).setOnComplete (OnCompleteAnim);
+				LeanTween.rotateLocal (Camera.main.gameObject, Vector3.zero, .8f);
 				break;
 		}
 	}
