@@ -32,13 +32,16 @@ public class GameCamera : MonoBehaviour
 	{
 		if (isEnabled) 
 		{
-			if (Input.GetAxis ("Horizontal") == 0 && Input.GetAxis ("Vertical") == 0) {
+			if (Input.GetAxis ("Horizontal") == 0 && Input.GetAxis ("Vertical") == 0) 
+			{
 				transform.RotateAround (rotationObject.position, rotationObject.up, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity);
 				transform.RotateAround (rotationObject.position, rotationObject.right, Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity * -1f);
 				transform.rotation = Quaternion.Euler (transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
 				//transform.Rotate (Input.GetAxis ("Mouse Y") * Time.deltaTime * horizontalSensivity, 0, 0);
 				//transform.Rotate (0, Input.GetAxis ("Mouse X") * Time.deltaTime * verticalSensivity * -1f, 0, Space.World);
-			} else {
+			} 
+			else 
+			{
 				transform.localPosition = new Vector3 (0, 0, -2f);
 				transform.localEulerAngles = Vector3.zero;
 			}
@@ -48,33 +51,36 @@ public class GameCamera : MonoBehaviour
 				DoAction(GameObject.Find("Player"));
 			}
 
-			if (Physics.Raycast (transform.position, transform.forward, out hitInfo, raycastDistance, raycastLayer)) 
+			if (Physics.Raycast (transform.position, transform.forward, out hitInfo, raycastDistance)) 
 			{
-				UIAcessMessage.Instance.ShowMessage (hitInfo.transform.position);
+				if (hitInfo.transform.gameObject.layer == 8) 
+				{
+					UIAcessMessage.Instance.ShowMessage (hitInfo.transform.position);
 
-				if (Input.GetKey (KeyCode.E)) 
-				{
-					UIAcessMessage.Instance.SetBackgroundScale (.90f);
-					buttonTotalCooldown += Time.deltaTime;
-				} 
-				else 
-				{
-					doAction = false;
-					UIAcessMessage.Instance.ResetBackgroundScale ();
-					buttonTotalCooldown = 0;
+					if (Input.GetKey (KeyCode.E)) 
+					{
+						UIAcessMessage.Instance.SetBackgroundScale (.90f);
+						buttonTotalCooldown += Time.deltaTime;
+					} 
+					else 
+					{
+						doAction = false;
+						UIAcessMessage.Instance.ResetBackgroundScale ();
+						buttonTotalCooldown = 0;
+					}
+
+					if (buttonTotalCooldown >= buttonCooldown)
+						doAction = true;
+
+					if (doAction) 
+					{
+						UIAcessMessage.Instance.CleanMessage ();
+						UIAcessMessage.Instance.ResetBackgroundScale ();
+						DoAction (hitInfo.transform.gameObject);
+					}
 				}
-
-				if (buttonTotalCooldown >= buttonCooldown)
-					doAction = true;
-
-				if (doAction) 
-				{
-					isEnabled = false;
-					doAction = false;
+				else
 					UIAcessMessage.Instance.CleanMessage ();
-					UIAcessMessage.Instance.ResetBackgroundScale ();
-					DoAction (hitInfo.transform.gameObject);
-				}
 			}
 			else
 				UIAcessMessage.Instance.CleanMessage ();
@@ -97,23 +103,31 @@ public class GameCamera : MonoBehaviour
 		//hitInfo.transform.GetComponent<SphereCollider> ().radius = 0;
 	}
 
-	void DoAction(GameObject gameObject)
+	void DoAction(GameObject go)
 	{
 		Transform cameraNewPosition;
+		doAction = false;
 
-		switch (gameObject.tag) 
+		switch (go.tag) 
 		{
 			case "SecCamera":
-				cameraNewPosition = gameObject.transform.FindChild("CameraPosition");
+				isEnabled = false; //disable camera until it animates
+				cameraNewPosition = go.transform.FindChild("CameraPosition");
 				Camera.main.transform.parent = cameraNewPosition;
 				LeanTween.moveLocal (Camera.main.gameObject, Vector3.zero, .8f).setOnComplete(OnCompleteAnim);
 				LeanTween.rotateLocal (Camera.main.gameObject, Vector3.zero, .8f);
 				break;
 			case "Player":
-				cameraNewPosition = gameObject.transform.FindChild ("CameraPosition");
+				isEnabled = false; //disable camera until it animates
+				cameraNewPosition = go.transform.FindChild ("CameraPosition");
 				Camera.main.transform.parent = cameraNewPosition;
 				LeanTween.moveLocal (Camera.main.gameObject, new Vector3 (0, 0, -2f), .8f).setOnComplete (OnCompleteAnim);
 				LeanTween.rotateLocal (Camera.main.gameObject, Vector3.zero, .8f);
+				break;
+		case "DoorUnlocker":
+				DoorUnlocker doorUnlocker = go.GetComponent<DoorUnlocker> ();
+				doorUnlocker.UnlockDoor ();
+				go.layer = 0;
 				break;
 		}
 	}
