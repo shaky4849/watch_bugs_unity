@@ -8,4 +8,4 @@ TODO List:
 - Unlock door Hacking (done)
 - Hacker Drone (TODO)
 - Hacker remote toy car (TODO)
-- Scenewith objective to use all (TODO)
+- Scene with objective to use all (TODO)
